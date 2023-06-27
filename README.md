@@ -1,1 +1,2 @@
 # pyGGame
+print('hello world')
