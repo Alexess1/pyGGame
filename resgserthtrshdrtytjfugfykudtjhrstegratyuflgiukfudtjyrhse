@@ -1,0 +1,101 @@
+import pygame
+
+class Sprite:
+    def __init__(self, x, y, speed, img):
+        self.image = pygame.image.load(img)
+        self.speed = speed
+        self.x = x
+        self.y = y
+
+
+Ncard = 0
+w = pygame.display.set_mode((1279, 700))
+Player = Sprite(100, 100, 1, 'C:/Users/JC-1/Desktop/pygame/pygame/asets/Right1.png')
+
+imgPlayerGoR = ['C:/Users/JC-1/Desktop/pygame/pygame/asets/Right1.png',
+                'C:/Users/JC-1/Desktop/pygame/pygame/asets/Right2.png']
+
+imgPlayerGoL = ['C:/Users/JC-1/Desktop/pygame/pygame/asets/Left1.png'
+                'C:/Users/JC-1/Desktop/pygame/pygame/asets/Left2.png']
+# for img in imgPlayerGoR:
+#     imgPlayerGoL.append(pygame.transform.flip(img, True, False))
+
+game = True
+while game:
+    for ev in pygame.event.get():
+        if ev.type == pygame.QUIT:  
+            game = False
+    keys = pygame.key.get_pressed()
+    if keys[pygame.K_RIGHT]:
+        Player.x += Player.speed
+        Player.image = imgPlayerGoR[Ncard % 4]
+    elif keys[pygame.K_LEFT]:
+        Player.x -= Player.speed
+        Player.image = imgPlayerGoL[Ncard % 4]
+    
+    w.fill((0, 0, 0))
+    w.blit(Player.image, (Player.x, Player.y))
+    pygame.display.update()
+    Ncard += 1
+pygame.quit()
+
+
+
+
+# import pygame
+#
+# class Sprite:
+#     def __init__(self, x, y, speed, img):
+#         self.image = pygame.image.load(img)
+#         self.speed = speed
+#         self.x = x
+#         self.y = y
+#         self.imgR = self.image
+#         self.imgL = pygame.transform.flip(self.image, True, False)
+#     def cords(self):
+#         return tuple([self.x, self.y])
+#
+#     def move(self, side):
+#         if side == 'right':
+#             self.x += self.speed
+#             self.image = self.imgR
+#         elif side == 'left':
+#             self.x -= self.speed
+#             self.image = self.imgL
+#         elif side == 'up':
+#             self.y -= self.speed
+#         elif side == 'down':
+#             self.y += self.speed
+#
+# walk_right = [
+#     pygame.image.load('C:/Users/JC-1/Desktop/pygame/pygame/asets/Right1.png'),
+#     pygame.image.load('C:/Users/JC-1/Desktop/pygame/pygame/asets/Right1.png')
+# ]
+#
+# walk_left = [
+#     pygame.image.load('C:/Users/JC-1/Desktop/pygame/pygame/asets/Left1.png'),
+#     pygame.image.load('C:/Users/JC-1/Desktop/pygame/pygame/asets/Left1.png')
+# ]
+#
+# bg = Sprite(0, 0, 0, 'C:/Users/JC-1/Desktop/pygame/pygame/asets/bg.jpg')
+#
+#
+#
+# w = pygame.display.set_mode((600, 300))
+# Player = Sprite(100, 175, 0.125, )
+# game = True
+# while game:
+#     for ev in pygame.event.get():
+#         if ev.type == pygame.QUIT:
+#             game = False
+#     keys = pygame.key.get_pressed()
+#     if keys[pygame.K_RIGHT]:
+#         Player.move('right')
+#     if keys[pygame.K_LEFT]:
+#         Player.move('left')
+#     w.fill((0, 0, 0))
+#     w.blit(bg.image, bg.cords())
+#
+#     w.blit(Player.image, Player.cords())
+#     pygame.display.update()
+# pygame.quit()
