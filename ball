@@ -1,0 +1,72 @@
+import pygame
+class Sprite:
+    def __init__(self, image, x, y):
+        self.image = pygame.image.load(image)
+        self.x = x
+        self.y = y
+        self.speedX = 1
+        self.speedY = 1
+        self.width = 50
+        self.height = 50
+
+    def move(self, side):
+        if side == 'left':
+            self.x -= self.speedX
+        elif side == 'right':
+            self.x += self.speedX
+        elif side == 'up':
+            self.y -= self.speedY
+        elif side == 'down':
+            self.y += self.speedY
+
+    def collide(self, other):
+        if ((self.x <= other.x <= self.x + self.width
+            and self.y <= other.y <= self.y + self.height)
+        or (self.x <= other.x <= other.width <= self.x + self.width
+                and self.y <= other.y + other.height <= self.y + self.height)
+        or (other.x <= self.x <= other.x + other.width
+                and other.y <= self.y + self.height <= other.y + other.height)
+        or (other.x <= self.x + self.width <= other.x + other.width
+                and other.y <= self.y <= other.y + other.height)):
+            return True
+
+class Ground:
+    def __init__(self):
+        self.image = pygame.image.load('assets/ground.png')
+        self.x = 0
+        self.y = 879
+        self.width = 1920
+        self.height = 80
+
+class Const():
+    def __init__(self, value):
+        self.value = value
+
+w = pygame.display.set_mode((1920, 1080))
+ball = Sprite('assets/ball2.png', 10, 10)
+g = Const(1)
+ground = Ground()
+game = True
+while game:
+    for ev in pygame.event.get():
+        if ev.type == pygame.QUIT:
+            game = False
+    keys = pygame.key.get_pressed()
+    if keys[pygame.K_ESCAPE]:
+        game = False
+    if keys[pygame.K_RIGHT]:
+            ball.move('right')
+    if keys[pygame.K_LEFT]:
+            ball.move('left')
+    if not ball.collide(ground):
+        ball.speedY += g.value
+    elif ball.collide(ground) and keys[pygame.K_SPACE]:
+        ball.speedY = -20
+    else:
+        ball.speedY = 0
+    ball.speedX = 10
+    ball.y += ball.speedY
+    w.fill((0, 0, 0))
+    w.blit(ball.image, (ball.x, ball.y))
+    w.blit(ground.image, (0, 0))
+    pygame.display.update()
