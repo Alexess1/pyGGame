@@ -1,0 +1,201 @@
+import pygame
+
+
+
+
+def collide(sprite1, sprite2):
+    if ((sprite1.x <= sprite2.x <= sprite1.x + sprite1.width
+         and sprite1.y <= sprite2.y <= sprite1.y + sprite1.height)
+            or (sprite1.x <= sprite2.x <= sprite2.width <= sprite1.x + sprite1.width
+                and sprite1.y <= sprite2.y + sprite2.height <= sprite1.y + sprite1.height)
+            or (sprite2.x <= sprite1.x <= sprite2.x + sprite2.width
+                and sprite2.y <= sprite1.y + sprite1.height <= sprite2.y + sprite2.height)
+            or (sprite2.x <= sprite1.x + sprite1.width <= sprite2.x + sprite2.width
+                and sprite2.y <= sprite1.y <= sprite2.y + sprite2.height)):
+        return True
+
+
+def collide_g(sprite, group):
+    iscollide = False
+    for Spr in group.sprites():
+        if collide(sprite.rect, Spr.rect):
+            iscollide = True
+    return iscollide
+
+
+class Const:
+    def __init__(self, value):
+        self.value = value
+
+
+class Sprite(pygame.sprite.Sprite):
+    def __init__(self, x, y, img):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.image.load(img)
+        self.rect = self.image.get_rect(topleft=(x, y))
+        self.speedx = 0
+        self.speedy = 0
+
+    def setimage(self, img):
+        self.image = pygame.image.load(img)
+
+
+class Player(Sprite):
+    def __init__(self, x, y, img, GoL, GoR):
+        Sprite.__init__(self, x, y, img)
+        self.image = pygame.image.load(img)
+        self.imgR = pygame.image.load(img)
+        self.imgL = pygame.transform.flip(self.image, True, False)
+        self.rect = self.image.get_rect(topleft=(x, y))
+        self.speedx = 5
+        self.speedy = 0
+        self.jumpower = -10
+        self.card = 0
+        self.animGoL = GoL
+        self.animGoR = GoR
+        self.dir = True  # True = right, False = left
+
+    def update(self, keys, g, GrPlatf):
+        if keys[pygame.K_RIGHT]:
+            self.rect.x += self.speedx
+            self.image = self.animGoR[self.card // 2 % 5]
+            self.dir = True
+        elif keys[pygame.K_LEFT]:
+            self.rect.x -= self.speedx
+            self.image = self.animGoL[self.card // 2 % 5]
+            self.dir = False
+        else:
+            if self.dir:
+                self.image = self.imgR
+            else:
+                self.image = self.imgL
+        if keys[pygame.K_SPACE]:
+            if self.speedy == 0:
+                self.speedy = self.jumpower
+
+        if not collide_g(self, GrPlatf):
+            self.speedy += g.value
+        elif self.speedy > 0:
+            self.speedy = 0
+
+        # gravity
+        self.rect.y += self.speedy
+        self.collider = self.rect
+        self.card += 1
+
+
+class Platform(Sprite):
+    def __init__(self, x, y, img, time, group):
+        Sprite.__init__(self, x, y, img)
+        self.time = time
+        self.add(group)
+
+
+Ncadr = 0
+clock = pygame.time.Clock()
+g = Const(1)
+w = pygame.display.set_mode((1279, 700))
+GroupPlatform = pygame.sprite.Group()
+Ground = Platform(80, 400, 'assets/ground.png', 100, GroupPlatform)
+Ground1 = Platform(380, 300, 'assets/ground.png', 100, GroupPlatform)
+Ground2 = Platform(500, 500, 'assets/ground.png', 100, GroupPlatform)
+Ground3 = Platform(800, 400, 'assets/ground.png', 100, GroupPlatform)
+Ground4 = Platform(750, 100, 'assets/ground.png', 100, GroupPlatform)
+
+
+
+ImgPlayerGoR = [pygame.image.load('assets/b1.png'),
+                pygame.image.load('assets/b2.png'),
+                pygame.image.load('assets/b3.png'),
+                pygame.image.load('assets/b4.png'),
+                pygame.image.load('assets/b5.png')]
+
+ImgPlayerGoL = []
+for img in ImgPlayerGoR:
+    ImgPlayerGoL.append(pygame.transform.flip(img, True, False))
+
+Player = Player(100, 100, 'assets/Player.png', ImgPlayerGoL, ImgPlayerGoR)
+
+game = True
+while game:
+    clock.tick(24)
+    for ev in pygame.event.get():
+        if ev.type == pygame.QUIT:
+            game = False
+        elif ev.type == pygame.K_ESCAPE:
+            game = False
+
+    keys = pygame.key.get_pressed()
+
+    Player.update(keys, g, GroupPlatform)
+    w.fill((0, 0, 0))
+    GroupPlatform.draw(w)
+    w.blit(Player.image, Player.rect)
+    pygame.display.update()
+    Ncadr += 1
+
+pygame.quit()
+
+#
+# class Sprite:
+#     def __init__(self, image, x, y):
+#         self.image = pygame.image.load(image)
+#         self.x = x
+#         self.y = y
+#         self.speedX = 1
+#         self.speedY = 1
+#         self.width = 50
+#         self.height = 50
+#
+#     def move(self, side):
+#         if side == 'left':
+#             self.x -= self.speedX
+#         elif side == 'right':
+#             self.x += self.speedX
+#         elif side == 'up':
+#             self.y -= self.speedY
+#         elif side == 'down':
+#             self.y += self.speedY
+#
+#
+#
+# class Ground:
+#     def __init__(self):
+#         self.image = pygame.image.load('assets/ground.png')
+#         self.x = 0
+#         self.y = 879
+#         self.width = 1920
+#         self.height = 80
+#
+# class Const():
+#     def __init__(self, value):
+#         self.value = value
+#
+# w = pygame.display.set_mode((1920, 1080))
+# ball = Sprite('assets/ball2.png', 10, 10)
+# g = Const(1)
+# ground = Ground()
+# game = True
+# while game:
+#     for ev in pygame.event.get():
+#         if ev.type == pygame.QUIT:
+#             game = False
+#     keys = pygame.key.get_pressed()
+#     if keys[pygame.K_ESCAPE]:
+#         game = False
+#     if keys[pygame.K_RIGHT]:
+#             ball.move('right')
+#     if keys[pygame.K_LEFT]:
+#             ball.move('left')
+#     if not ball.collide(ground):
+#         ball.speedY += g.value
+#     elif ball.collide(ground) and keys[pygame.K_SPACE]:
+#         ball.speedY = -20
+#     else:
+#         ball.speedY = 0
+#     ball.speedX = 10
+#     ball.y += ball.speedY
+#     w.fill((0, 0, 0))
+#     w.blit(ball.image, (ball.x, ball.y))
+#     w.blit(ground.image, (0, 0))
+#     pygame.display.update()
