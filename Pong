@@ -1,0 +1,157 @@
+import pygame
+
+pygame.init()
+font20 = pygame.font.Font('assets/ARIAL.TTF', 20)
+BLACK = (0, 0, 0)
+WHITE = (255, 255, 255)
+GREEN = (0, 255, 0)
+# params
+WIGHT, HEIGHT = 900, 600
+screen = pygame.display.set_mode((WIGHT, HEIGHT))
+pygame.display.set_caption('Pong')
+
+clock = pygame.time.Clock()
+FPS = 30
+
+
+# Striker
+class Striker:
+    def __init__(self, posx, posy, wight, height, speed, color):
+        self.posx = posx
+        self.posy = posy
+        self.wight = wight
+        self.height = height
+        self.speed = speed
+        self.color = color
+        self.geekRect = pygame.Rect(posx, posy, wight, height)
+        self.geek = pygame.draw.rect(screen, self.color, self.geekRect)
+
+    def display(self):
+        self.geek = pygame.draw.rect(screen, self.color, self.geekRect)
+
+    def update(self, yFac):
+        self.posy = self.posy + self.posy + self.speed * yFac
+        if self.posy <= 0:
+            self.posy = 0
+        elif self.posy + self.height >= HEIGHT:
+            self.posy = HEIGHT - self.height
+
+        self.geekRect = (self.posx, self.posy, self.wight, self.height)
+
+    def displatScore(self, text, score, x, y, color):
+        text = font20.render(text + str(score), True, color)
+        textRect = text.get_rect()
+        textRect.center = (x, y)
+        return self.geekRect
+    def getRect(self):
+        return self.geekRect
+
+
+class Ball:
+    def __init__(self, posy, posx, radius, speed, color):
+        self.posy = posy
+        self.posx = posx
+        self.radius = radius
+        self.speed = speed
+        self.color = color
+        self.xFac = 1
+        self.yFac = -1
+        self.ball = pygame.draw.circle(
+            screen, self.color, (self.posx, self.posy), self.radius
+        )
+        self.firstTime = 1
+
+    def display(self):
+        self.ball = pygame.draw.circle(
+            screen, self.color, (self.posx, self.posy), self.radius
+        )
+
+    def update(self):
+        self.posy += self.speed * self.xFac
+        self.posx += self.speed * self.yFac
+
+        if self.posy <= 0 or self.posy >= HEIGHT:
+            self.yFac *= -1
+
+        if self.posx <= 0 and self.firstTime:
+            self.firstTime = 0
+            return 1
+        elif self.posx >= WIGHT and self.firstTime:
+            self.firstTime = 0
+            return -1
+        else:
+            return -1
+
+    def reset(self):
+        self.posx = WIGHT // 2
+        self.posy = HEIGHT // 2
+        self.xFac *= -1
+        self.firsttime = 1
+
+    def hit(self):
+        self.xFac *= -1
+
+    def getRect(self):
+        return self.ball
+
+
+def main():
+    running = True
+    geek1 = Striker(20, 0, 10, 100, 10, GREEN)
+    geek2 = Striker(WIGHT - 30, 0, 10, 100, 10, GREEN)
+    ball = Ball(WIGHT // 2., HEIGHT // 2, 7, 7, WHITE)
+
+    listOfGeeks = [geek1, geek2]
+
+    geek1Score, geek2Score = 0, 0
+    geek1YFac, geek2YFac = 0, 0
+
+    while running:
+        screen.fill(BLACK)
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_UP:
+                    geek2YFac = -1
+                if event.key == pygame.K_DOWN:
+                    geek2YFac = 1
+                if event.key == pygame.K_w:
+                    geek1YFac = -1
+                if event.key == pygame.K_s:
+                    geek1YFac = 1
+            if event.type == pygame.KEYUP:
+                if event.type == pygame.K_UP or event.key == pygame.K_DOWN:
+                    geek2YFac = 0
+                if event.type == pygame.K_UP or event.key == pygame.K_DOWN:
+                    geek1YFac = 0
+
+        for geek in listOfGeeks:
+            if pygame.Rect.colliderect(ball.getRect(), geek.getRect()):
+                ball.hit()
+
+        geek1.update(geek1YFac)
+        geek2.update(geek2YFac)
+        point = ball.update()
+
+        if point == -1:
+            geek1Score += 1
+        elif point == 1:
+            geek2Score += 1
+
+        if point:
+            ball.reset()
+
+        geek1.display()
+        geek2.display()
+        ball.display()
+
+        geek1.displatScore('Geek_1', geek1Score, 100, 20, WHITE)
+        geek2.displatScore('Geek_2', geek1Score, WIGHT - 100, 20, WHITE)
+        pygame.display.update()
+        clock.tick(FPS)
+
+
+if __name__ == '__main__':
+    main()
+    pygame.quit()
